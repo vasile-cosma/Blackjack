@@ -1,26 +1,37 @@
 <?php
 require_once(__DIR__ . "/common.php");
-
 $errors = [];
 $users = $blackjackDataAccess->getAllUsers();
 $registeredUsers = count($blackjackDataAccess->getAllUsers());
 
 $email = '';
 $password = '';
-$recuerdame = false;
+$remember = false;
 
-if (empty(!$_SESSION)) {
-    header('Location: game.php');
+// Si ya hay sesión iniciada, redirigimos a blackjack.php
+if (!empty(($_SESSION))) {
+    header('Location: main.php');
     die;
 }
 
+if (isset($_COOKIE['id'])) {
+    $userRemembered = $blackjackDataAccess->getUserById($_COOKIE['id']);
+
+    if ($userRemembered != null) {
+        $email = $userRemembered->getEmail();
+        $remember = true;
+    }
+}
+
+// Si el método es POST, validamos la información recibida
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
     $password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-    $recuerdame = filter_input(INPUT_POST, 'recuerdame', FILTER_VALIDATE_BOOLEAN);
+    $remember = filter_input(INPUT_POST, 'remember', FILTER_VALIDATE_BOOLEAN) ?? false;
 
     $user = $blackjackDataAccess->getUserByEmail($email);
 
+    // Ante cualquier discrepancia, añadimos un error a nuestro array
     if (empty($email)) {
         $errors[] = 'ERROR: Debe introducir un email';
     } elseif (!empty($email) && !isset($user)) {
@@ -32,12 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } elseif (isset($user) && !password_verify($password, $user->getPassword())) {
         $errors[] = 'ERROR: La contraseña introducida no es correcta.';
     }
-
-    // Validamos que la contraseña tenga 8 caracteres
-    if (strlen($pwdRegistro) < minCharPwd)
-        array_push($errors, "ERROR: La contraseña debe tener mínimo " . minCharPwd . " caracteres");
-
-
+    if ($remember){
+        setcookie('id', $user->getId(), time() + 3600);
+    }
 }
 
 ?>
@@ -56,39 +64,63 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body class="bg">
     <?php
 
+    // Si hay errores, los mostramos
     if (!empty($errors)) {
-        echo '<ul class="list-inline">';
+        echo '<div class="container"> <i
+                                        class="bi bi-exclamation-triangle-fill me-2"></i>';
         foreach ($errors as $error) {
-            echo '<li class="list-inline-item">' . $error . '</li>';
+            echo '<div class="alert alert-danger">' . $error . '</div>';
+        }
+        echo '</div>';
+        /*
+        echo '<ul class="list-group list-group-flush">';
+        foreach ($errors as $error) {
+            echo '<li class="list-group-item list-group-item-light text-center">' . $error . '</li>';
         }
         echo '</ul>';
+        */
+    } elseif (empty($errors) && $_SERVER["REQUEST_METHOD"] == "POST") {
+        $_SESSION['email'] = $email;
+        $_SESSION['user_id'] = $user->getId();
+        header('Location: main.php');
+        die;
     }
     ?>
-    <div class="container mt-5 border border-dark rounded-5 p-5 card p-4 bg-dark bg-opacity-75 text-white">
-        <div class="overlay"> </div>
+    <div class="container mt-5 border border-dark rounded-5 p-4 card bg-dark bg-opacity-75 text-white align-items-center shadow">
+        <img src="static/images/logo.png" class="logo-casino mb-3" alt="Vasile's Clover">
         <div class="row">
             <h1 class="fw-bold text-center text-light border-bottom border-2 border-secondary">INICIO DE SESIÓN</h1>
         </div>
+
         <form method="post" novalidate>
-            <div class="form-group" class="row">
-                <label for="email">Email:</label>
+            <div class="form-group row mt-1">
+                <label for="email" class="text-center">Email</label>
                 <input type="email" name="email" id="email" placeholder="tu_email@ejemplo.com"
-                    class="form-control border rounded-pill">
+                    class="form-control border rounded-pill" required value="<?= $email ?? '' ?>">
             </div>
-            <div class="form-group">
-                <label for="password">Contraseña:</label>
-                <input type="password" name="password" id="password" class="form-control border rounded-pill">
+
+            <div class="form-group row mt-1">
+                <label for="password" class="text-center">Contraseña</label>
+                <input type="password" name="password" id="password" class="form-control border rounded-pill col-2"
+                    placeholder="Contraseña" required>
             </div>
-            <div class="form-group">
-                <label for="recuerdame">Recuérdame</label>
-                <input type="checkbox" name="recuerdame" id="recuerdame" value="true" class="form-check-input">
+
+            <div class="form-check d-flex justify-content-center align-items-center gap-2 mt-1">
+                <input type="checkbox" name="remember" id="remember" value="true" class="form-check-input"
+                    style="border-color:white">
+                <label for="remember" class="form-check-label text-center" style="color:white" value="true"
+                    <?php if($remember)  echo"checked";?>>Recuérdame</label>
             </div>
-            <button type=" submit" value="submit"
-                class="control-form btn btn-light border border-dark rounded-pill">Iniciar
-                sesión</button>
+
+            <div class="row">
+                <button type=" submit" value="submit" class="btn btn-light border border-dark rounded-3">Iniciar
+                    sesión</button>
+            </div>
         </form>
-        <div class="text-center">Usuarios registrados: <?= $registeredUsers ?></div>
-        <div class="text-center lead">¿No tienes cuenta? <a href="register.php" class="btn btn-light">¡Regístrate!</a>
+
+        <div class="text-center mt-1">Usuarios registrados: <?= $registeredUsers ?></div>
+        <div class="text-center lead mt-2">¿No tienes cuenta? <a href="register.php"
+                class="btn btn-light rounded-3">¡Regístrate!</a>
         </div>
 
     </div>
@@ -98,5 +130,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
     crossorigin="anonymous"></script>
+<script src="static/js/funcionalidad.js"></script>
 
 </html>

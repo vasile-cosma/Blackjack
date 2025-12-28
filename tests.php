@@ -62,7 +62,7 @@ require_once __DIR__ . '/utils/SecUtils.php';
     echo "</ul>";
 
     // 2. Crear un nuevo usuario
-    $newUser = new User('new.user@example.com', password_hash('newpassword', PASSWORD_DEFAULT), 'UserNuevo', 'Nuevo', 'Usuario', '1992-01-01', 2500);
+    $newUser = new User('new.user@example.com', password_hash('newpassword', PASSWORD_DEFAULT), 'UserNuevo', 'Nuevo', 'Usuario', '1992-01-01', 2500, 0, 0);
     $created = $blackjackDataAccess->createUser($newUser);
     echo "<h2>Crear usuario</h2>" . ($created ? "Usuario creado." : "Error al crear usuario.");
 
@@ -72,7 +72,7 @@ require_once __DIR__ . '/utils/SecUtils.php';
     echo $user ? "Usuario encontrado: {$user->getFirstName()} {$user->getLastName()}" : "Usuario no encontrado.";
 
     // 4. Actualizar un usuario
-    $userToUpdate = new User('updated.user@example.com', password_hash('updatedpassword', PASSWORD_DEFAULT), 'NuevoUser', 'Usuario', 'Actualizado', '2007-01-01', 2500);
+    $userToUpdate = new User('updated.user@example.com', password_hash('updatedpassword', PASSWORD_DEFAULT), 'NuevoUser', 'Usuario', 'Actualizado', '2007-01-01', 2500, 1, 0);
     $updated = $blackjackDataAccess->updateUser($userToUpdate);
     echo "<h2>Actualizar usuario</h2>" . ($updated ? "Usuario actualizado." : "Error al actualizar usuario.");
 

@@ -9,8 +9,10 @@ class User
     private $lastName;
     private $birthDate;
     private $balance;
+    private $gamesPlayed;
+    private $gamesWon;
 
-    public function __construct($email, $password, $username, $firstName, $lastName, $birthDate, $balance, $id = null)
+    public function __construct($email, $password, $username, $firstName, $lastName, $birthDate, $balance, $gamesPlayed, $gamesWon, $id = null)
     {
         $this->id = $id;
         $this->setEmail($email);
@@ -20,7 +22,10 @@ class User
         $this->setLastName($lastName);
         $this->setBirthDate($birthDate);
         $this->setBalance($balance);
+        $this->setGamesPlayed($gamesPlayed);
+        $this->setGamesWon($gamesWon);
     }
+
 
     // Getters
     public function getId()
@@ -57,10 +62,18 @@ class User
     {
         return $this->birthDate;
     }
-
     public function getBalance()
     {
         return $this->balance;
+    }
+
+    public function getGamesPlayed()
+    {
+        return $this->gamesPlayed;
+    }
+    public function getGamesWon()
+    {
+        return $this->gamesWon;
     }
 
     // Setters
@@ -93,9 +106,19 @@ class User
     {
         $this->birthDate = $birthDate;
     }
+
     public function setBalance($balance)
     {
         $this->balance = $balance;
     }
+    public function setGamesPlayed($gamesPlayed)
+    {
+        $this->gamesPlayed = $gamesPlayed;
+    }
+    public function setGamesWon($gamesWon)
+    {
+        $this->gamesWon = $gamesWon;
+    }
+
 
 }
