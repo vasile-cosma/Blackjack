@@ -238,3 +238,14 @@ a {
     justify-content: center;
     margin-top: 1rem;
 }
+
+.card-img {
+    height: 15rem;
+    width: auto;
+}
+
+.card-back {
+    background-image: url("../images/Cartas/back.svg");
+    height: 15rem;
+    width: auto;
+}

@@ -13,7 +13,7 @@ class Card
         $this->name = $name;
         $this->value = $value;
         $this->suit = $suit;
-        $this->img = '../app/static/images/Cartas/' . $name . '_of_' . $suit . '.svg';
+        $this->img = 'static/images/Cartas/' . $name . '_of_' . $suit . '.svg';
     }
 
     // Getters
