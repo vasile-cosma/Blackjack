@@ -9,7 +9,7 @@ $password = '';
 $remember = false;
 
 // Si ya hay sesión iniciada, redirigimos a blackjack.php
-if (!empty(($_SESSION))) {
+if (isset(($_SESSION['email']))) {
     header('Location: main_page.php');
     die;
 }
@@ -43,8 +43,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } elseif (isset($user) && !password_verify($password, $user->getPassword())) {
         $errors[] = 'ERROR: La contraseña introducida no es correcta.';
     }
-    if ($remember){
-        setcookie('id', $user->getId(), time() + 3600);
+
+    if (empty($errors)) {
+        if ($remember) {
+            setcookie('id', $user->getId(), time() + 3600);
+        }
+
+        $_SESSION['email'] = $email;
+        $_SESSION['user_id'] = $user->getId();
+        header('Location: main_page.php');
+        die;
     }
 }
 
@@ -62,8 +70,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 
 <body class="bg mt-0 pt-0 bt-0">
- 
-    <div class="container mt-5 border border-dark rounded-5 p-4 card bg-dark bg-opacity-75 text-white align-items-center shadow">
+
+    <div
+        class="container mt-5 border border-dark rounded-5 p-4 card bg-dark bg-opacity-75 text-white align-items-center shadow">
         <img src="static/images/logo.png" class="logo-casino mb-3" alt="Vasile's Clover">
         <div class="row">
             <h1 class="fw-bold text-center text-light border-bottom border-2 border-secondary">INICIO DE SESIÓN</h1>
@@ -84,9 +93,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             <div class="form-check d-flex justify-content-center align-items-center gap-2 mt-1">
                 <input type="checkbox" name="remember" id="remember" value="true" class="form-check-input"
-                    style="border-color:white">
-                <label for="remember" class="form-check-label text-center" style="color:white" value="true"
-                    <?php if($remember)  echo"checked";?>>Recuérdame</label>
+                    style="border-color:white" <?php if ($remember)
+                        echo "checked"; ?>>
+                <label for="remember" class="form-check-label text-center" style="color:white"
+                    value="true">Recuérdame</label>
             </div>
 
             <div class="row">
@@ -101,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
 
     </div>
-   <?php
+    <?php
 
     // Si hay errores, los mostramos
     if (!empty($errors)) {
@@ -118,11 +128,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         echo '</ul>';
         */
-    } elseif (empty($errors) && $_SERVER["REQUEST_METHOD"] == "POST") {
-        $_SESSION['email'] = $email;
-        $_SESSION['user_id'] = $user->getId();
-        header('Location: main_page.php');
-        die;
     }
     ?>
 </body>
@@ -130,6 +135,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
     crossorigin="anonymous"></script>
-<script src="static/js/funcionalidad.js"></script>
 
 </html>
